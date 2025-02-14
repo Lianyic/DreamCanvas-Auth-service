@@ -10,7 +10,7 @@ load_dotenv()
 app = Flask(__name__, template_folder="templates", static_folder="static")
 
 
-DATABASE_URL = os.getenv("DATABASE_URL", "mysql://adminuser:YourSecurePassword!@127.0.0.1/dreamcanvas-user-db")
+DATABASE_URL = os.getenv("DATABASE_URL", "mysql://adminuser:LeilaLily?!@127.0.0.1/dreamcanvas-user-db")
 
 
 db_config = {
