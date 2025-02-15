@@ -26,6 +26,9 @@ def home():
     background_image = "images/background.webp"
     return render_template("login.html", background_image=background_image)
 
+@app.route("/register", methods=["GET"])
+def register_page():
+    return render_template("register.html")
 
 @app.route("/register", methods=["POST"])
 def register():
