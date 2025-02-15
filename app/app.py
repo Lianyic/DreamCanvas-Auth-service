@@ -1,8 +1,9 @@
 import os
-import mysql.connector
-import bcrypt
 from flask import Flask, render_template, request, jsonify
+from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
 from dotenv import load_dotenv
+import bcrypt
 
 
 load_dotenv()
@@ -10,37 +11,17 @@ load_dotenv()
 app = Flask(__name__, template_folder="templates", static_folder="static")
 
 
-DATABASE_URL = os.getenv("DATABASE_URL", "mysql://adminuser:LeilaLily?!@127.0.0.1/dreamcanvas-user-db")
+DATABASE_URL = os.getenv("DATABASE_URL","mysql+pymysql://adminuser:LeilaLily?!@dreamcanvas-user-db.mysql.database.azure.com/dream_user_db?ssl-ca=DigiCertGlobalRootCA.crt.pem").strip('"')
+app.config["SQLALCHEMY_DATABASE_URI"] = DATABASE_URL
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
-db_config = {
-    "host": DATABASE_URL.split("@")[1].split("/")[0],
-    "user": DATABASE_URL.split("//")[1].split(":")[0],
-    "password": DATABASE_URL.split(":")[2].split("@")[0],
-    "database": DATABASE_URL.split("/")[-1]
-}
+db = SQLAlchemy(app)
+migrate = Migrate(app, db)
 
-def init_db():
-    try:
-        conn = mysql.connector.connect(**db_config)
-        cursor = conn.cursor()
-        cursor.execute("""
-            CREATE TABLE IF NOT EXISTS users (
-                id INT AUTO_INCREMENT PRIMARY KEY,
-                username VARCHAR(255) NOT NULL UNIQUE,
-                email VARCHAR(255) NOT NULL UNIQUE,
-                password_hash VARCHAR(255) NOT NULL
-            );
-        """)
-        conn.commit()
-        cursor.close()
-        conn.close()
-        print("✅ Database initialized successfully!")
-    except mysql.connector.Error as err:
-        print("❌ Database initialization error:", err)
-
-init_db()
-
-
+class User(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(255), unique=True, nullable=False)
+    password_hash = db.Column(db.String(255), nullable=False)
 
 @app.route("/")
 def home():
@@ -56,28 +37,18 @@ def register():
     try:
         data = request.json 
         username = data["username"]
-        email = data["email"]
         password = data["password"]
 
-        
         hashed_password = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
 
-        
-        conn = mysql.connector.connect(**db_config)
-        cursor = conn.cursor()
-
-        
-        query = "INSERT INTO users (username, email, password_hash) VALUES (%s, %s, %s)"
-        cursor.execute(query, (username, email, hashed_password))
-        conn.commit()
-
-        cursor.close()
-        conn.close()
+        new_user = User(username=username, password_hash=hashed_password)
+        db.session.add(new_user)
+        db.session.commit()
 
         return jsonify({"message": "User registered successfully!"}), 201
-    except mysql.connector.Error as err:
+    except Exception as err:
+        db.session.rollback()
         return jsonify({"error": str(err)}), 500
-
 
 @app.route("/login", methods=["POST"])
 def login():
@@ -86,22 +57,12 @@ def login():
         username = data["username"]
         password = data["password"]
 
-        conn = mysql.connector.connect(**db_config)
-        cursor = conn.cursor()
+        user = User.query.filter_by(username=username).first()
 
-
-        query = "SELECT password_hash FROM users WHERE username = %s"
-        cursor.execute(query, (username,))
-        user = cursor.fetchone()
-
-        cursor.close()
-        conn.close()
-
-
-        if user and bcrypt.checkpw(password.encode("utf-8"), user[0].encode("utf-8")):
+        if user and bcrypt.checkpw(password.encode("utf-8"), user.password_hash.encode("utf-8")):
             return jsonify({"message": "Login successful!"}), 200
         return jsonify({"error": "Invalid credentials!"}), 401
-    except mysql.connector.Error as err:
+    except Exception as err:
         return jsonify({"error": str(err)}), 500
 
 if __name__ == "__main__":

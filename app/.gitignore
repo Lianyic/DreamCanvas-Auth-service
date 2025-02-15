@@ -1,0 +1,4 @@
+"DigiCertGlobalRootCA.crt.pem" 
+dreamvenv/
+__pycache__/
+.env

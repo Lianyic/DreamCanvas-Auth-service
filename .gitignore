@@ -1,2 +1,14 @@
 dreamvenv/
 __pycache__/
+.env
+migrations/
+DigiCertGlobalRootCA.crt.pem
+.vscode/
+*.log
+*.sqlite3
+
+*.pyc
+*.pyo
+*.pyd
+
+*.dockerignore
