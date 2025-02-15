@@ -36,7 +36,6 @@ or
 flask run
 ```
 
-
 # Optional:
 ## Build the docker image
 ```
@@ -54,3 +53,5 @@ docker push ghcr.io/lianyic/dreamcanvas-auth-service:latest
 ## Deploy to Azure
 Hope deployment successfull finger crossed (๑•̀ㅂ•́)و✧
 
+## ACI web access URL
+http://auth-services.bshtc3h3fqgkgcct.ukwest.azurecontainer.io:5000
