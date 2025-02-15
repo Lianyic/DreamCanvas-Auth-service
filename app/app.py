@@ -12,13 +12,34 @@ app = Flask(__name__, template_folder="templates", static_folder="static")
 
 DATABASE_URL = os.getenv("DATABASE_URL", "mysql://adminuser:LeilaLily?!@127.0.0.1/dreamcanvas-user-db")
 
-
 db_config = {
     "host": DATABASE_URL.split("@")[1].split("/")[0],
     "user": DATABASE_URL.split("//")[1].split(":")[0],
     "password": DATABASE_URL.split(":")[2].split("@")[0],
     "database": DATABASE_URL.split("/")[-1]
 }
+
+def init_db():
+    try:
+        conn = mysql.connector.connect(**db_config)
+        cursor = conn.cursor()
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS users (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                username VARCHAR(255) NOT NULL UNIQUE,
+                email VARCHAR(255) NOT NULL UNIQUE,
+                password_hash VARCHAR(255) NOT NULL
+            );
+        """)
+        conn.commit()
+        cursor.close()
+        conn.close()
+        print("✅ Database initialized successfully!")
+    except mysql.connector.Error as err:
+        print("❌ Database initialization error:", err)
+
+init_db()
+
 
 
 @app.route("/")
