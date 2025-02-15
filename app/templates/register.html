@@ -14,73 +14,14 @@
             document.body.style.backgroundImage = `url(${backgrounds[Math.floor(Math.random() * backgrounds.length)]})`;
         });
     </script>
-    <style>
-        body {
-            background-size: cover;
-            background-position: center;
-            font-family: Arial, sans-serif;
-        }
-        .container {
-            width: 350px;
-            margin: 100px auto;
-            padding: 20px;
-            background: rgba(255, 255, 255, 0.9);
-            border-radius: 10px;
-            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-            text-align: center;
-        }
-        h1 {
-            font-size: 24px;
-            margin-bottom: 20px;
-            color: #333;
-        }
-        label {
-            display: block;
-            text-align: left;
-            margin: 10px 0 5px;
-            font-weight: bold;
-            color: #333;
-        }
-        input {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 15px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            font-size: 16px;
-            color: #333;
-            background-color: #f9f9f9;
-        }
-        button {
-            width: 100%;
-            padding: 10px;
-            background-color: #007BFF;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-        }
-        button:hover {
-            background-color: #0056b3;
-        }
-        p {
-            margin-top: 10px;
-            color: #333;
-        }
-        a {
-            color: #007BFF;
-            text-decoration: none;
-            font-weight: bold;
-        }
-        a:hover {
-            text-decoration: underline;
-        }
-    </style>    
 </head>
 <body>
     <div class="container">
         <h1>Register for DreamCanvas</h1>
+        
+        <!-- 错误提示框，默认隐藏 -->
+        <div id="error-message" class="error-message" style="display: none;"></div>
+
         <form id="register-form">
             <label for="username">Username</label>
             <input type="text" id="username" name="username" placeholder="Enter your username" required>
@@ -109,21 +50,28 @@
                 },
                 body: JSON.stringify(formData)
             })
-            .then(response => response.json())
-            .then(data => {
-                console.log(data);
-                if (data.message) {
-                    alert(data.message);
+            .then(response => response.json().then(data => ({ status: response.status, body: data })))
+            .then(({ status, body }) => {
+                console.log(body);
+                if (status === 201) {
                     window.location.href = "/";
+                } else if (status === 400) {
+                    showError(body.error);
                 } else {
-                    alert("Error: " + data.error);
+                    showError("Unexpected error. Please try again.");
                 }
             })
             .catch(error => {
                 console.error("Error:", error);
-                alert("Network error, please try again.");
+                showError("Network error, please try again.");
             });
-        });        
+        });
+
+        function showError(message) {
+            const errorBox = document.getElementById("error-message");
+            errorBox.textContent = message;
+            errorBox.style.display = "block";
+        }
     </script>
 </body>
 </html>

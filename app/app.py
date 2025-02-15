@@ -3,6 +3,7 @@ from flask import Flask, render_template, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from dotenv import load_dotenv
+from sqlalchemy.exc import IntegrityError
 import bcrypt
 
 load_dotenv()
@@ -20,7 +21,6 @@ app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 
-# 用户表模型
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(255), unique=True, nullable=False)
@@ -34,6 +34,7 @@ def home():
 @app.route("/register", methods=["GET"])
 def register_page():
     return render_template("register.html")
+
 
 @app.route("/register", methods=["POST"])
 def register():
@@ -49,9 +50,15 @@ def register():
         db.session.commit()
 
         return jsonify({"message": "User registered successfully!"}), 201
+
+    except IntegrityError:
+        db.session.rollback()
+        return jsonify({"error": "Username already exists. Please choose another one."}), 400
+
     except Exception as err:
         db.session.rollback()
         return jsonify({"error": str(err)}), 500
+
 
 @app.route("/login", methods=["POST"])
 def login():
