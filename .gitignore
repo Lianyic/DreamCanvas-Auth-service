@@ -5,7 +5,7 @@ migrations/
 .vscode/
 *.log
 *.sqlite3
-
+app\DigiCertGlobalRootCA.crt.pem
 *.pyc
 *.pyo
 *.pyd

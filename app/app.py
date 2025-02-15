@@ -5,19 +5,22 @@ from flask_migrate import Migrate
 from dotenv import load_dotenv
 import bcrypt
 
-
 load_dotenv()
 
 app = Flask(__name__, template_folder="templates", static_folder="static")
 
+DATABASE_URL = os.getenv(
+    "DATABASE_URL", 
+    "mysql+pymysql://adminuser:LeilaLily?!@dreamcanvas-user-db.mysql.database.azure.com/dream_user_db"
+).strip('"')
 
-DATABASE_URL = os.getenv("DATABASE_URL","mysql+pymysql://adminuser:LeilaLily?!@dreamcanvas-user-db.mysql.database.azure.com/dream_user_db?ssl-ca=DigiCertGlobalRootCA.crt.pem").strip('"')
 app.config["SQLALCHEMY_DATABASE_URI"] = DATABASE_URL
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 
+# 用户表模型
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(255), unique=True, nullable=False)
