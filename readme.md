@@ -55,3 +55,8 @@ Hope deployment successfull finger crossed (๑•̀ㅂ•́)و✧
 
 ## ACI web access URL
 http://auth-services.bshtc3h3fqgkgcct.ukwest.azurecontainer.io:5000
+
+## Check database
+```
+mysql -h dreamcanvas-user-db.mysql.database.azure.com -u adminuser -p --ssl-mode=REQUIRED
+```
