@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Register - DreamCanvas</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
     <script>
         const backgrounds = [
             "{{ url_for('static', filename='images/background.webp') }}",
@@ -18,17 +19,16 @@
 <body>
     <div class="container">
         <h1>Register for DreamCanvas</h1>
-        
-        <!-- 错误提示框，默认隐藏 -->
+
         <div id="error-message" class="error-message" style="display: none;"></div>
 
         <form id="register-form">
             <label for="username">Username</label>
             <input type="text" id="username" name="username" placeholder="Enter your username" required>
-        
+
             <label for="password">Password</label>
             <input type="password" id="password" name="password" placeholder="Enter your password" required>
-        
+
             <button type="submit">Register</button>
         </form>        
         <p>Already have an account? <a href="/">Login here</a></p>
@@ -37,13 +37,13 @@
     <script>
         document.getElementById("register-form").addEventListener("submit", function(event) {
             event.preventDefault();
-        
+
             const formData = {
                 username: document.getElementById("username").value,
                 password: document.getElementById("password").value
             };
-        
-            fetch("/register", {
+
+            fetch("http://127.0.0.1:5000/register", {  
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
@@ -54,7 +54,9 @@
             .then(({ status, body }) => {
                 console.log(body);
                 if (status === 201) {
-                    window.location.href = "/";
+                    setTimeout(() => {
+                        window.location.href = "http://127.0.0.1:5001/record";
+                    }, 1000);
                 } else if (status === 400) {
                     showError(body.error);
                 } else {

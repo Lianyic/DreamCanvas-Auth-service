@@ -1,14 +1,16 @@
 import os
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, session
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from dotenv import load_dotenv
 from sqlalchemy.exc import IntegrityError
 import bcrypt
 
+
 load_dotenv()
 
 app = Flask(__name__, template_folder="templates", static_folder="static")
+app.secret_key = "79515e01fd5fe2ccf7abaa36bbea4640"
 
 DATABASE_URL = os.getenv(
     "DATABASE_URL", 
@@ -70,6 +72,7 @@ def login():
         user = User.query.filter_by(username=username).first()
 
         if user and bcrypt.checkpw(password.encode("utf-8"), user.password_hash.encode("utf-8")):
+            session["username"] = username
             return jsonify({"message": "Login successful!"}), 200
         return jsonify({"error": "Invalid credentials!"}), 401
     except Exception as err:
