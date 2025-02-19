@@ -10,7 +10,6 @@ env:
   CONTAINER_NAME: auth-services
   RESOURCE_GROUP: DreamCanvas
   IMAGE_NAME: ghcr.io/lianyic/dreamcanvas-auth-service:latest
-  DATABASE_URL:  ${{ secrets.DATABASE_URL }}
 
 jobs:
   deploy:
@@ -50,4 +49,4 @@ jobs:
           --cpu 1 \
           --memory 1 \
           --os-type Linux \
-          --environment-variables DATABASE_URL= ${{ secrets.DATABASE_URL }}
+          --environment-variables DATABASE_URL=${{ secrets.DATABASE_URL }}
