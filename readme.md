@@ -36,7 +36,19 @@ or
 flask run
 ```
 
-# Optional:
+# Auto Deployed to Github, available at URL:
+## ACI web access URL
+http://dreamcanvas-auth.ukwest.azurecontainer.io:5000/
+
+## Check database
+```
+mysql -h dreamcanvas-user-db.mysql.database.azure.com -u adminuser -p --ssl-mode=REQUIRED
+```
+
+
+
+# Leave for now, May delete later!
+
 ## Build the docker image
 ```
 docker build -t dreamcanvas-auth-service .
@@ -52,11 +64,3 @@ docker push ghcr.io/lianyic/dreamcanvas-auth-service:latest
 ```
 ## Deploy to Azure
 Hope deployment successfull finger crossed (๑•̀ㅂ•́)و✧
-
-## ACI web access URL
-http://dreamcanvas-auth.ukwest.azurecontainer.io:5000/
-
-## Check database
-```
-mysql -h dreamcanvas-user-db.mysql.database.azure.com -u adminuser -p --ssl-mode=REQUIRED
-```
