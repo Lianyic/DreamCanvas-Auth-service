@@ -34,15 +34,10 @@ jobs:
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-    - name: Deploy to Azure Container Instance
+    - name: Update Azure Container Instance
       run: |
-        az container create \
+        az container update \
           --resource-group ${{ env.RESOURCE_GROUP }} \
           --name ${{ env.CONTAINER_NAME }} \
-          --image ${{ env.IMAGE_NAME }} \
-          --dns-name-label dreamcanvas-auth \
-          --ports 5000 \
-          --cpu 1 \
-          --memory 1 \
-          --os-type Linux \
-          --environment-variables DATABASE_URL=${{ env.DATABASE_URL }}
+          --set environmentVariables=DATABASE_URL=${{ env.DATABASE_URL }} \
+          --image ${{ env.IMAGE_NAME }}
