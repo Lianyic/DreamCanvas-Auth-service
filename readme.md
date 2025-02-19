@@ -54,7 +54,7 @@ docker push ghcr.io/lianyic/dreamcanvas-auth-service:latest
 Hope deployment successfull finger crossed (๑•̀ㅂ•́)و✧
 
 ## ACI web access URL
-http://auth-services.bshtc3h3fqgkgcct.ukwest.azurecontainer.io:5000
+http://dreamcanvas-auth.ukwest.azurecontainer.io:5000/
 
 ## Check database
 ```
