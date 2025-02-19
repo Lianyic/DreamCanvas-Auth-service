@@ -43,7 +43,7 @@
                 password: document.getElementById("password").value
             };
 
-            fetch("http://127.0.0.1:5000/register", {  
+            fetch("http://dreamcanvas-auth.ukwest.azurecontainer.io/register", {  
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
@@ -55,7 +55,7 @@
                 console.log(body);
                 if (status === 201) {
                     setTimeout(() => {
-                        window.location.href = "http://127.0.0.1:5001/record";
+                        window.location.href = "http://dreamcanvas-analysis.ukwest.azurecontainer.io/record";
                     }, 1000);
                 } else if (status === 400) {
                     showError(body.error);
