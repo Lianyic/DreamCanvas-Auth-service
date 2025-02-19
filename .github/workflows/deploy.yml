@@ -34,7 +34,7 @@ jobs:
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-- name: Deploy to Azure Container Instances
+
   run: |
     az container create \
       --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
