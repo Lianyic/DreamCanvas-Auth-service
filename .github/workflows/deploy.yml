@@ -50,4 +50,4 @@ jobs:
           --cpu 1 \
           --memory 1 \
           --os-type Linux \
-          --environmen23t-variables DATABASE_URL= ${{ secrets.DATABASE_URL }}
+          --environment-variables DATABASE_URL= ${{ secrets.DATABASE_URL }}
