@@ -1,0 +1,47 @@
+name: Deploy to Azure Container Instance
+
+on:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+
+env:
+  CONTAINER_NAME: auth-services
+  RESOURCE_GROUP: DreamCanvas
+  IMAGE_NAME: ghcr.io/lianyic/dreamcanvas-auth-service:latest
+  DATABASE_URL: mysql+pymysql://adminuser:LeilaLily?!@dreamcanvas-user-db.mysql.database.azure.com/dream_user_db
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Login to GitHub Container Registry
+      run: echo "${{ secrets.GIT_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+    - name: Build Docker Image
+      run: docker build -t $IMAGE_NAME .
+
+    - name: Push Docker Image to GHCR
+      run: docker push $IMAGE_NAME
+
+    - name: Azure Login
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    - name: Deploy to Azure Container Instance
+      run: |
+        az container create \
+          --resource-group $RESOURCE_GROUP \
+          --name $CONTAINER_NAME \
+          --image $IMAGE_NAME \
+          --registry-login-server ghcr.io \
+          --registry-username ${{ github.actor }} \
+          --registry-password ${{ secrets.GIT_TOKEN }} \
+          --dns-name-label auth-services \
+          --ports 5000
