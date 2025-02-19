@@ -34,15 +34,15 @@ jobs:
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-
-  run: |
-    az container create \
-      --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
-      --name dreamcanvas-auth-service \
-      --image ghcr.io/lianyic/dreamcanvas-auth-service:latest \
-      --dns-name-label dreamcanvas-auth \
-      --ports 5000 \
-      --cpu 1 \
-      --memory 1 \
-      --os-type Linux \
-      --environment-variables DATABASE_URL=${{ secrets.DATABASE_URL }}
+    - name: Deploy to Azure Container Instance
+      run: |
+        az container create \
+          --resource-group ${{ env.RESOURCE_GROUP }} \
+          --name ${{ env.CONTAINER_NAME }} \
+          --image ${{ env.IMAGE_NAME }} \
+          --dns-name-label dreamcanvas-auth \
+          --ports 5000 \
+          --cpu 1 \
+          --memory 1 \
+          --os-type Linux \
+          --environment-variables DATABASE_URL=${{ env.DATABASE_URL }}
