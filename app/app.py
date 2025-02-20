@@ -80,10 +80,11 @@ def login():
 
         if user and bcrypt.checkpw(password.encode("utf-8"), user.password_hash.encode("utf-8")):
             session["username"] = username
+            session.modified = True
             response = jsonify({"message": "Login successful!"})
             response.headers["Access-Control-Allow-Origin"] = "http://dreamcanvas-analysis.ukwest.azurecontainer.io:5001"
             response.headers["Access-Control-Allow-Credentials"] = "true"
-            response.headers["Set-Cookie"] = "session=" + session.sid + "; Path=/; SameSite=None; Secure"
+            response.headers["Set-Cookie"] = "session=" + request.cookies.get("session", "") + "; Path=/; SameSite=None; Secure"
             return response, 200
 
         return jsonify({"error": "Invalid credentials!"}), 401
