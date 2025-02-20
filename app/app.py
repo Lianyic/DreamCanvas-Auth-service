@@ -23,7 +23,8 @@ app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config.update(
     SESSION_COOKIE_SAMESITE="Lax",
     # SESSION_COOKIE_SECURE=True
-    SESSION_COOKIE_SECURE=False
+    SESSION_COOKIE_SECURE=False,
+    SESSION_COOKIE_DOMAIN='.ukwest.azurecontainer.io'
 )
 
 db = SQLAlchemy(app)
