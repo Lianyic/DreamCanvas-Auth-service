@@ -6,7 +6,6 @@ from dotenv import load_dotenv
 from sqlalchemy.exc import IntegrityError
 import bcrypt
 
-
 load_dotenv()
 
 app = Flask(__name__, template_folder="templates", static_folder="static")
@@ -19,6 +18,12 @@ DATABASE_URL = os.getenv(
 
 app.config["SQLALCHEMY_DATABASE_URI"] = DATABASE_URL
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+
+
+app.config.update(
+    SESSION_COOKIE_SAMESITE="None",
+    SESSION_COOKIE_SECURE=True
+)
 
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
@@ -36,7 +41,6 @@ def home():
 @app.route("/register", methods=["GET"])
 def register_page():
     return render_template("register.html")
-
 
 @app.route("/register", methods=["POST"])
 def register():
@@ -61,7 +65,6 @@ def register():
         db.session.rollback()
         return jsonify({"error": str(err)}), 500
 
-
 @app.route("/login", methods=["POST"])
 def login():
     try:
@@ -73,10 +76,22 @@ def login():
 
         if user and bcrypt.checkpw(password.encode("utf-8"), user.password_hash.encode("utf-8")):
             session["username"] = username
-            return jsonify({"message": "Login successful!"}), 200
+            response = jsonify({"message": "Login successful!"})
+            response.headers["Access-Control-Allow-Origin"] = "http://dreamcanvas-analysis.ukwest.azurecontainer.io:5001"
+            response.headers["Access-Control-Allow-Credentials"] = "true"
+            return response, 200
+
         return jsonify({"error": "Invalid credentials!"}), 401
     except Exception as err:
         return jsonify({"error": str(err)}), 500
+
+# 允许跨域
+@app.after_request
+def apply_cors(response):
+    response.headers["Access-Control-Allow-Origin"] = "http://dreamcanvas-analysis.ukwest.azurecontainer.io:5001"
+    response.headers["Access-Control-Allow-Credentials"] = "true"
+    response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
+    return response
 
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0", port=5000)
