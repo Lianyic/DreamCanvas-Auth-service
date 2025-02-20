@@ -3,6 +3,8 @@ from flask import Flask, render_template, request, jsonify, session
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
+from flask_session import Session
+import redis
 from dotenv import load_dotenv
 from sqlalchemy.exc import IntegrityError
 import bcrypt
@@ -10,26 +12,36 @@ import bcrypt
 load_dotenv()
 
 app = Flask(__name__, template_folder="templates", static_folder="static")
-app.secret_key = "79515e01fd5fe2ccf7abaa36bbea4640"
+app.secret_key = os.getenv("SECRET_KEY", "79515e01fd5fe2ccf7abaa36bbea4640")
 
+# 配置 CORS，允许携带 Cookie
 CORS(app, supports_credentials=True)
 
+# 配置数据库
 DATABASE_URL = os.getenv(
-    "DATABASE_URL", 
+    "DATABASE_URL",
     "mysql+pymysql://adminuser:LeilaLily?!@dreamcanvas-user-db.mysql.database.azure.com/dream_user_db"
 ).strip('"')
 
 app.config["SQLALCHEMY_DATABASE_URI"] = DATABASE_URL
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
-app.config.update(
-    SESSION_COOKIE_SAMESITE="None",
-    SESSION_COOKIE_SECURE=True,
-    SESSION_COOKIE_HTTPONLY=True,
-    SESSION_COOKIE_NAME="session",
-    SESSION_COOKIE_DOMAIN=None
+# 使用 Redis 存储 Session，避免跨域 Cookie 限制
+app.config["SESSION_TYPE"] = "redis"
+app.config["SESSION_PERMANENT"] = False
+app.config["SESSION_USE_SIGNER"] = True
+app.config["SESSION_KEY_PREFIX"] = "session:"
+app.config["SESSION_REDIS"] = redis.StrictRedis(
+    host=os.getenv("REDIS_HOST", "localhost"),
+    port=int(os.getenv("REDIS_PORT", 6379)),
+    db=0,
+    decode_responses=True
 )
 
+# 初始化 Session
+Session(app)
+
+# 初始化数据库
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 
@@ -43,14 +55,10 @@ def home():
     background_image = "images/background.webp"
     return render_template("login.html", background_image=background_image)
 
-@app.route("/register", methods=["GET"])
-def register_page():
-    return render_template("register.html")
-
 @app.route("/register", methods=["POST"])
 def register():
     try:
-        data = request.json 
+        data = request.json
         username = data["username"]
         password = data["password"]
 
@@ -80,18 +88,18 @@ def login():
         user = User.query.filter_by(username=username).first()
 
         if user and bcrypt.checkpw(password.encode("utf-8"), user.password_hash.encode("utf-8")):
-            session["username"] = username
+            session["username"] = username  # 现在 Session 存储在 Redis 中
             session.modified = True
-            response = jsonify({"message": "Login successful!"})
-            response.headers["Access-Control-Allow-Origin"] = "http://dreamcanvas-analysis.ukwest.azurecontainer.io:5001"
-            response.headers["Access-Control-Allow-Credentials"] = "true"
-            response.headers["Set-Cookie"] = "session=" + request.cookies.get("session", "") + "; Path=/; SameSite=None; Secure"
-            return response, 200
+            return jsonify({"message": "Login successful!"}), 200
 
         return jsonify({"error": "Invalid credentials!"}), 401
     except Exception as err:
         return jsonify({"error": str(err)}), 500
 
+@app.route("/logout", methods=["POST"])
+def logout():
+    session.pop("username", None)
+    return jsonify({"message": "Logged out successfully!"}), 200
 
 @app.after_request
 def apply_cors(response):
