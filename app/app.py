@@ -1,5 +1,6 @@
 import os
 from flask import Flask, render_template, request, jsonify, session
+from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from dotenv import load_dotenv
@@ -11,6 +12,8 @@ load_dotenv()
 app = Flask(__name__, template_folder="templates", static_folder="static")
 app.secret_key = "79515e01fd5fe2ccf7abaa36bbea4640"
 
+CORS(app, supports_credentials=True)
+
 DATABASE_URL = os.getenv(
     "DATABASE_URL", 
     "mysql+pymysql://adminuser:LeilaLily?!@dreamcanvas-user-db.mysql.database.azure.com/dream_user_db"
@@ -18,7 +21,6 @@ DATABASE_URL = os.getenv(
 
 app.config["SQLALCHEMY_DATABASE_URI"] = DATABASE_URL
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-
 
 app.config.update(
     SESSION_COOKIE_SAMESITE="Lax",
@@ -81,6 +83,7 @@ def login():
             response = jsonify({"message": "Login successful!"})
             response.headers["Access-Control-Allow-Origin"] = "http://dreamcanvas-analysis.ukwest.azurecontainer.io:5001"
             response.headers["Access-Control-Allow-Credentials"] = "true"
+            response.headers["Set-Cookie"] = "session=" + session.sid + "; Path=/; SameSite=None; Secure"
             return response, 200
 
         return jsonify({"error": "Invalid credentials!"}), 401
