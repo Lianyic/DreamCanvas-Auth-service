@@ -85,7 +85,7 @@ def login():
     except Exception as err:
         return jsonify({"error": str(err)}), 500
 
-# 允许跨域
+
 @app.after_request
 def apply_cors(response):
     response.headers["Access-Control-Allow-Origin"] = "http://dreamcanvas-analysis.ukwest.azurecontainer.io:5001"
