@@ -1,8 +1,10 @@
-import os 
+import os
 from flask import Flask, render_template, request, jsonify, session
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
+from flask_session import Session
+import redis
 from dotenv import load_dotenv
 from sqlalchemy.exc import IntegrityError
 import bcrypt
