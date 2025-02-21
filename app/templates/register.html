@@ -43,7 +43,7 @@
                 password: document.getElementById("password").value
             };
 
-            fetch("http://dreamcanvas-auth.ukwest.azurecontainer.io/register", {  
+            fetch("/register", {  
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
