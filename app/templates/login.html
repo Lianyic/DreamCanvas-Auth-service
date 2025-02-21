@@ -51,7 +51,7 @@
             .then(response => response.json().then(data => ({ status: response.status, body: data })))
             .then(({ status, body }) => {
                 if (status === 200) {
-                    window.location.href = "http://dreamcanvas-analysis.ukwest.azurecontainer.io/record";
+                    window.location.href = "https://dreamcanvas-analysis.ukwest.azurecontainer.io/record";
                 } else {
                     alert(body.error || "Login failed!");
                 }
