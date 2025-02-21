@@ -39,7 +39,9 @@ class User(db.Model):
 
 @app.route("/")
 def home():
-    return render_template("login.html")
+    background_image = "images/background.webp"
+    return render_template("login.html", background=background_image)
+
 
 @app.route("/register", methods=["GET"])
 def register_page():
