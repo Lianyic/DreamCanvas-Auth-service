@@ -56,7 +56,7 @@
                 console.log(body);
                 if (status === 201) {
                     setTimeout(() => {
-                        window.location.href = "https://dreamcanvas-analysis.ukwest.azurecontainer.io/record";
+                        window.location.href = "http://dreamcanvas-analysis.ukwest.azurecontainer.io:5001/record";
                     }, 1000);
                 } else if (status === 400) {
                     showError(body.error);
