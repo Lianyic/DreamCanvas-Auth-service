@@ -1,13 +1,12 @@
 import os
-from flask import Flask, render_template, request, jsonify, session
+import redis
+import bcrypt
+from flask import Flask, render_template, request, jsonify
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
-from flask_session import Session
-import redis
 from dotenv import load_dotenv
 from sqlalchemy.exc import IntegrityError
-import bcrypt
 
 load_dotenv()
 
@@ -16,26 +15,19 @@ app.secret_key = os.getenv("SECRET_KEY", "79515e01fd5fe2ccf7abaa36bbea4640")
 
 CORS(app, supports_credentials=True)
 
+
 DATABASE_URL = os.getenv("DATABASE_URL", "mysql+pymysql://adminuser:password@your-database.mysql.database.azure.com/dream_user_db").strip('"')
 app.config["SQLALCHEMY_DATABASE_URI"] = DATABASE_URL
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 
-app.config["SESSION_TYPE"] = "redis"
-app.config["SESSION_PERMANENT"] = False
-app.config["SESSION_USE_SIGNER"] = True
-app.config["SESSION_KEY_PREFIX"] = "session:"
-app.config["SESSION_REDIS"] = redis.StrictRedis(
+redis_client = redis.StrictRedis(
     host=os.getenv("REDIS_HOST", "dreamcanvas-redis.redis.cache.windows.net"),
     port=int(os.getenv("REDIS_PORT", 6380)),
     password=os.getenv("REDIS_PASSWORD"),
     ssl=True,
     decode_responses=True
 )
-
-
-Session(app)
-
 
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
@@ -81,7 +73,7 @@ def login():
         user = User.query.filter_by(username=username).first()
 
         if user and bcrypt.checkpw(password.encode("utf-8"), user.password_hash.encode("utf-8")):
-            session["username"] = username
+            redis_client.set(f"session:{username}", username, ex=3600)
             return jsonify({"message": "Login successful!"}), 200
 
         return jsonify({"error": "Invalid credentials!"}), 401
@@ -90,8 +82,13 @@ def login():
 
 @app.route("/logout", methods=["POST"])
 def logout():
-    session.pop("username", None)
-    return jsonify({"message": "Logged out successfully!"})
+    try:
+        data = request.json
+        username = data.get("username")
+        redis_client.delete(f"session:{username}")
+        return jsonify({"message": "Logged out successfully!"})
+    except Exception as err:
+        return jsonify({"error": str(err)}), 500
 
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0", port=5000)
