@@ -7,10 +7,10 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <style>
         body {
-            background: url("{{ url_for('static', filename=background_image) }}") no-repeat center center fixed;
+            background: url("{{ url_for('static', filename=background) }}") no-repeat center center fixed;
             background-size: cover;
         }
-    </style>
+    </style>    
 </head>
 <body>
     <div class="container">
@@ -45,12 +45,13 @@
                 headers: {
                     "Content-Type": "application/json"
                 },
-                body: JSON.stringify(formData)
+                body: JSON.stringify(formData),
+                credentials: "include"
             })
             .then(response => response.json().then(data => ({ status: response.status, body: data })))
             .then(({ status, body }) => {
                 if (status === 200) {
-                    window.location.href = "http://dreamcanvas-analysis.ukwest.azurecontainer.io/record";
+                    window.location.href = "http://dreamcanvas-analysis.ukwest.azurecontainer.io:5001/record";
                 } else {
                     alert(body.error || "Login failed!");
                 }
