@@ -37,10 +37,9 @@ jobs:
         sleep 5
         curl --fail http://localhost:5000/ || exit 1
 
-  build-and-deploy:
+  build:
     needs: test
     runs-on: ubuntu-latest
-
     steps:
     - name: Checkout Repository
       uses: actions/checkout@v4
@@ -54,6 +53,13 @@ jobs:
     - name: Push Docker Image to GHCR
       run: docker push $IMAGE_NAME
 
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+      
     - name: Azure Login
       uses: azure/login@v1
       with:
