@@ -5,17 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DreamCanvas - Login</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <style>
-        body {
-            background: url("{{ url_for('static', filename=background) }}") no-repeat center center fixed;
-            background-size: cover;
-        }
-    </style>    
 </head>
 <body>
+    <h1>DreamCanvas</h1>
     <div class="container">
-        <h1>Welcome to DreamCanvas</h1>
-        <p>Record and analyze your dreams</p>
         <div class="login-box">
             <h2>Login</h2>
             <form id="login-form">
@@ -30,21 +23,19 @@
             <p>Don't have an account? <a href="/register">Register here</a></p>
         </div>
     </div>
-
+    <footer>
+        &copy; 2025 DreamCanvas
+    </footer>
     <script>
         document.getElementById("login-form").addEventListener("submit", function(event) {
-            event.preventDefault(); 
-
+            event.preventDefault();
             const formData = {
                 username: document.getElementById("username").value,
                 password: document.getElementById("password").value
             };
-
             fetch("/login", {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
+                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(formData),
                 credentials: "include"
             })

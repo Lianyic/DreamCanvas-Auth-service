@@ -3,37 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Register - DreamCanvas</title>
+    <title>DreamCanvas - Register</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-
-    <script>
-        const backgrounds = [
-            "{{ url_for('static', filename='images/background.webp') }}",
-            "{{ url_for('static', filename='images/background2.webp') }}"
-        ];
-        document.addEventListener("DOMContentLoaded", function() {
-            document.body.style.backgroundImage = `url(${backgrounds[Math.floor(Math.random() * backgrounds.length)]})`;
-        });
-    </script>
 </head>
 <body>
+    <h1>DreamCanvas</h1>
     <div class="container">
-        <h1>Register for DreamCanvas</h1>
+        <div class="login-box">
+            <h2>Register</h2>
+            <form id="register-form">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" required>
 
-        <div id="error-message" class="error-message" style="display: none;"></div>
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required>
 
-        <form id="register-form">
-            <label for="username">Username</label>
-            <input type="text" id="username" name="username" placeholder="Enter your username" required>
-
-            <label for="password">Password</label>
-            <input type="password" id="password" name="password" placeholder="Enter your password" required>
-
-            <button type="submit">Register</button>
-        </form>        
-        <p>Already have an account? <a href="/">Login here</a></p>
+                <button type="submit">Register</button>
+            </form>
+            <p>Already have an account? <a href="/">Login here</a></p>
+        </div>
     </div>
-
+    <footer>
+        &copy; 2025 DreamCanvas
+    </footer>
     <script>
         document.getElementById("register-form").addEventListener("submit", function(event) {
             event.preventDefault();
@@ -59,22 +51,16 @@
                         window.location.href = "http://dreamcanvas-analysis.ukwest.azurecontainer.io:5001/record";
                     }, 1000);
                 } else if (status === 400) {
-                    showError(body.error);
+                    alert(body.error);
                 } else {
-                    showError("Unexpected error. Please try again.");
+                    alert("Unexpected error. Please try again.");
                 }
             })
             .catch(error => {
                 console.error("Error:", error);
-                showError("Network error, please try again.");
+                alert("Network error, please try again.");
             });
         });
-
-        function showError(message) {
-            const errorBox = document.getElementById("error-message");
-            errorBox.textContent = message;
-            errorBox.style.display = "block";
-        }
     </script>
 </body>
 </html>
