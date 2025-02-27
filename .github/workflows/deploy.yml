@@ -13,7 +13,7 @@ env:
 
 jobs:
   test:
-    name: Run Code Quality & Flask Test
+    name: Code Quality & Flask Test
     runs-on: ubuntu-latest
     steps:
     - name: Checkout Repository
@@ -39,7 +39,7 @@ jobs:
         curl --fail http://localhost:5000/ || exit 1
 
   build:
-    name: Build Docker Image & Push to GHCR
+    name: Build to GHCR
     needs: test
     runs-on: ubuntu-latest
     steps:
@@ -56,7 +56,7 @@ jobs:
       run: docker push $IMAGE_NAME
 
   deploy:
-    name: Deploy to Azure Container Instance
+    name: Deploy to ACI
     needs: build
     runs-on: ubuntu-latest
     steps:
