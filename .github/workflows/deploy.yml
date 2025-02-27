@@ -1,4 +1,4 @@
-name: Deploy to Azure Container Instance
+name: Deploy Authentication Service
 
 on:
   push:
@@ -12,18 +12,42 @@ env:
   IMAGE_NAME: ghcr.io/lianyic/dreamcanvas-auth-service:latest
 
 jobs:
-  deploy:
+  test:
     runs-on: ubuntu-latest
-
     steps:
     - name: Checkout Repository
       uses: actions/checkout@v4
 
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+
+    - name: Install Dependencies
+      run: |
+        pip install -r requirements.txt
+
+    - name: Run Code Linter
+      run: |
+        flake8 .
+
+    - name: Run Unit Tests
+      run: |
+        pytest
+
+  build-and-deploy:
+    needs: test
+    runs-on: ubuntu-latest
+
+    steps:    
     - name: Login to GitHub Container Registry
       run: echo "${{ secrets.GIT_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
     - name: Build Docker Image
       run: docker build -t $IMAGE_NAME .
+    
+    - name: Verify Docker Image Build
+      run: docker images | grep $IMAGE_NAME
 
     - name: Push Docker Image to GHCR
       run: docker push $IMAGE_NAME
@@ -33,10 +57,21 @@ jobs:
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
 
+    - name: Check if Azure Container Instance Exists
+      id: check-container
+      continue-on-error: true
+      run: |
+        az container show --resource-group $RESOURCE_GROUP --name $CONTAINER_NAME
+
     - name: Delete existing Azure Container Instance (if exists)
+      if: steps.check-container.outcome == 'success'
       continue-on-error: true
       run: |
         az container delete --resource-group $RESOURCE_GROUP --name $CONTAINER_NAME --yes
+
+    - name: Ensure Container Cleanup
+      run: |
+        az container list --resource-group $RESOURCE_GROUP --output table
 
     - name: Create new Azure Container Instance
       run: |
@@ -53,3 +88,11 @@ jobs:
             REDIS_HOST=${{ secrets.REDIS_HOST }} \
             REDIS_PORT=${{ secrets.REDIS_PORT }} \
             REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}
+    
+    - name: Verify Deployment
+      run: |
+        az container show --resource-group $RESOURCE_GROUP --name $CONTAINER_NAME --output table
+      
+    - name: Output Deployment Logs
+      run: |
+        az container logs --resource-group $RESOURCE_GROUP --name $CONTAINER_NAME
