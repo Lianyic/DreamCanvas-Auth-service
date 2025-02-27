@@ -1,7 +1,9 @@
 import os
 import redis
 import bcrypt
-from flask import Flask, Blueprint, render_template, request, jsonify, make_response
+from flask import (
+    Flask, Blueprint, render_template, request, jsonify, make_response
+)
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
@@ -20,8 +22,9 @@ CORS(app, supports_credentials=True)
 
 
 DATABASE_URL = os.getenv(
-    "DATABASE_URL", 
-    "mysql+pymysql://adminuser:password@your-database.mysql.database.azure.com/dream_user_db"
+    "DATABASE_URL",
+    "mysql+pymysql://adminuser:password" +
+    "@your-database.mysql.database.azure.com/dream_user_db"
 ).strip('"')
 app.config["SQLALCHEMY_DATABASE_URI"] = DATABASE_URL
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
@@ -48,14 +51,17 @@ class User(db.Model):
 
 auth_bp = Blueprint("auth", __name__)
 
+
 @auth_bp.route("/")
 def home():
     background_image = "images/background.webp"
     return render_template("login.html", background=background_image)
 
+
 @auth_bp.route("/register", methods=["GET"])
 def register_page():
     return render_template("register.html")
+
 
 @auth_bp.route("/register", methods=["POST"])
 def register():
@@ -64,7 +70,9 @@ def register():
         username = data["username"]
         password = data["password"]
 
-        hashed_password = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
+        hashed_password = bcrypt.hashpw(
+            password.encode("utf-8"), bcrypt.gensalt()
+        ).decode("utf-8")
         new_user = User(username=username, password_hash=hashed_password)
         db.session.add(new_user)
         db.session.commit()
@@ -73,11 +81,14 @@ def register():
 
     except IntegrityError:
         db.session.rollback()
-        return jsonify({"error": "Username already exists. Please choose another one."}), 400
+        return jsonify(
+            {"error": "Username already exists. Please choose another one."}
+        ), 400
 
     except Exception as err:
         db.session.rollback()
         return jsonify({"error": str(err)}), 500
+
 
 @auth_bp.route("/login", methods=["POST"])
 def login():
@@ -88,16 +99,26 @@ def login():
 
         user = User.query.filter_by(username=username).first()
 
-        if user and bcrypt.checkpw(password.encode("utf-8"), user.password_hash.encode("utf-8")):
+        if user and bcrypt.checkpw(
+            password.encode("utf-8"), user.password_hash.encode("utf-8")
+        ):
             redis_client.set(f"session:{username}", username, ex=3600)
 
-            response = make_response(jsonify({"message": "Login successful!"}), 200)
-            response.set_cookie("username", username, httponly=True, samesite="None", secure=True)
+            response = make_response(
+                jsonify({"message": "Login successful!"}), 200
+            )
+            response.set_cookie(
+                "username", username,
+                httponly=True,
+                samesite="None",
+                secure=True
+            )
             return response
 
         return jsonify({"error": "Invalid credentials!"}), 401
     except Exception as err:
         return jsonify({"error": str(err)}), 500
+
 
 @auth_bp.route("/logout", methods=["POST"])
 def logout():
