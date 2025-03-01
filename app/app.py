@@ -15,23 +15,20 @@ load_dotenv()
 
 
 app = Flask(__name__, template_folder="templates", static_folder="static")
-app.secret_key = os.getenv("SECRET_KEY", "79515e01fd5fe2ccf7abaa36bbea4640")
+app.secret_key = os.getenv("SECRET_KEY")
 
 
 CORS(app, supports_credentials=True)
 
 
 DATABASE_URL = os.getenv(
-    "DATABASE_URL",
-    "mysql+pymysql://adminuser:password" +
-    "@your-database.mysql.database.azure.com/dream_user_db"
-).strip('"')
+    "DATABASE_URL").strip('"')
 app.config["SQLALCHEMY_DATABASE_URI"] = DATABASE_URL
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 
 redis_client = redis.StrictRedis(
-    host=os.getenv("REDIS_HOST", "dreamcanvas-redis.redis.cache.windows.net"),
+    host=os.getenv("REDIS_HOST"),
     port=int(os.getenv("REDIS_PORT", 6380)),
     password=os.getenv("REDIS_PASSWORD"),
     ssl=True,
