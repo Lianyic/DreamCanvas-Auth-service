@@ -15,7 +15,8 @@ DATABASE_URL=mysql+pymysql://adminuser:LeilaLily?!@dreamcanvas-user-db.mysql.dat
 ## Step 3: Create & Activate a Virtual Environment
 ```bash
 python -m venv dreamvenv
-dreamvenv\Scripts\activate
+dreamvenv\Scripts\activate  # Windows
+source dreamvenv/bin/activate  # macOS/Linux
 ```
 
 ## Step 4: Install Dependencies
@@ -35,8 +36,14 @@ python app.py
 or 
 flask run
 ```
+## Step 7: Push changes to github(auto deployment to ACI)
+```bash 
+git add .
+git commit -m "Your commit message"
+git push origin master
+```
 
-# Auto Deployed to Github, available at URL:
+# Auto Deployed to Github once pushed, available at URL:
 ## ACI web access URL
 http://dreamcanvas-auth.ukwest.azurecontainer.io:5000/
 
@@ -45,22 +52,14 @@ http://dreamcanvas-auth.ukwest.azurecontainer.io:5000/
 mysql -h dreamcanvas-user-db.mysql.database.azure.com -u adminuser -p --ssl-mode=REQUIRED
 ```
 
-
-
-# Leave for now, May delete later!
+## Local Docker Run Step
 
 ## Build the docker image
 ```
 docker build -t dreamcanvas-auth-service .
 ```
 
-## Tag the image
+## Run the container locally
 ```
-docker tag dreamcanvas-auth-service ghcr.io/lianyic/dreamcanvas-auth-service:latest
+docker run -p 5000:5000 --env-file .env dreamcanvas-auth-service
 ```
-## Push to GHCR
-```
-docker push ghcr.io/lianyic/dreamcanvas-auth-service:latest
-```
-## Deploy to Azure
-Hope deployment successfull finger crossed (๑•̀ㅂ•́)و✧
