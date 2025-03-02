@@ -32,12 +32,14 @@ flask db upgrade
 ```
 
 ### Step 6: Run the App
+default running at http://127.0.0.1:5000
 ```bash 
 python app/app.py
 ```
 
 ## Access the Deployed Service
-DreamCanvas Authentication Service is automatically deployed via GitHub Actions and is accessible at: http://dreamcanvas-auth.ukwest.azurecontainer.io:5000/
+DreamCanvas Authentication Service is automatically deployed via GitHub Actions and is accessible at:  
+http://dreamcanvas-auth.ukwest.azurecontainer.io:5000/
 
 ### Check Database Connection
 ```
